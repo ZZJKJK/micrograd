@@ -1,0 +1,17 @@
+==== micrograd pytest run ====
+time   : 2026-10-05 20:09:40
+cwd    : C:\Users\Administrator\Desktop\学习\AI\Studying Record\10\10.04-AI Program\micrograd
+command: .\.venv\Scripts\python.exe -m pytest test/test_engine.py -v
+=============================
+============================= test session starts =============================
+platform win32 -- Python 3.9.25, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Administrator\Desktop\学习\AI\Studying Record\10\10.04-AI Program\micrograd\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\Desktop\学习\AI\Studying Record\10\10.04-AI Program\micrograd
+plugins: anyio-4.12.1
+collecting ... collected 2 items
+
+test/test_engine.py::test_sanity_check PASSED                            [ 50%]
+test/test_engine.py::test_more_ops PASSED                                [100%]
+
+============================== 2 passed in 5.62s ==============================
+exit code: 0
