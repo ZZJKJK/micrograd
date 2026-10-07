@@ -1,4 +1,7 @@
 
+import math
+
+
 class Value:
     """ stores a single scalar value and its gradient """
 
@@ -33,7 +36,21 @@ class Value:
         return out
 
     def __pow__(self, other):
-        assert isinstance(other, (int, float)), "only supporting int/float powers for now"
+        if isinstance(other, Value):
+            # out = self ** other, both sides are nodes => two partial derivatives
+            #   d/dself  = other * self**(other-1)
+            #   d/dother = self**other * ln(self)
+            assert self.data > 0, "base must be > 0 when the exponent is a Value (ln(base) is needed)"
+            out = Value(self.data**other.data, (self, other), '**')
+
+            def _backward():
+                self.grad += (other.data * self.data**(other.data-1)) * out.grad
+                other.grad += (out.data * math.log(self.data)) * out.grad
+            out._backward = _backward
+
+            return out
+
+        assert isinstance(other, (int, float)), "only supporting int/float/Value powers for now"
         out = Value(self.data**other, (self,), f'**{other}')
 
         def _backward():
@@ -47,6 +64,37 @@ class Value:
 
         def _backward():
             self.grad += (out.data > 0) * out.grad
+        out._backward = _backward
+
+        return out
+
+    def exp(self):
+        out = Value(math.exp(self.data), (self,), 'exp')
+
+        def _backward():
+            self.grad += out.data * out.grad # d(e^x)/dx = e^x, already stored in out.data
+        out._backward = _backward
+
+        return out
+
+    def log(self):
+        assert self.data > 0, "log is only defined for x > 0"
+        out = Value(math.log(self.data), (self,), 'log')
+
+        def _backward():
+            self.grad += (1 / self.data) * out.grad # d(ln x)/dx = 1/x
+        out._backward = _backward
+
+        return out
+
+    def tanh(self):
+        # math.tanh(x) == (e^{2x} - 1) / (e^{2x} + 1), but it does not overflow
+        # for large |x| the way the explicit exp formula would.
+        t = math.tanh(self.data)
+        out = Value(t, (self,), 'tanh')
+
+        def _backward():
+            self.grad += (1 - t**2) * out.grad # d(tanh x)/dx = 1 - tanh(x)^2
         out._backward = _backward
 
         return out
